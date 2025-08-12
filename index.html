@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Shopping List</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body class="bg-gradient-to-r from-fuchsia-500 to-pink-500 pb-5">
+    <div
+        class="container w-[90vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[40vw] bg-black rounded-lg shadow-lg text-white m-auto flex flex-col items-center justify-center p-4 mt-[5%] gap-4">
+
+        <div class="heading">
+            <h2 class="text-2xl sm:text-3xl text-white animate-bounce text-center">Simple Shopping List</h2>
+        </div>
+        <div class="formGroup w-full">
+            <form action="" class="w-full">
+                <div>
+                    <label for="inputItem" class="text-[18px] sm:text-[20px]">Item: </label><br>
+                    <input type="text" name="" id="inputItem" placeholder="Enter Item Name"
+                        class="px-4 py-2 w-full max-w-[500px] rounded-lg shadow-lg border-[5px] border-red-400 mt-[4px] text-orange-400">
+                </div>
+                <div class="mt-4">
+                    <label for="inputPrice" class="text-[18px] sm:text-[20px]">Price: </label><br>
+                    <input type="number" name="" id="inputPrice" placeholder="Enter Price"
+                        class="px-4 py-2 w-full max-w-[500px] rounded-lg shadow-lg border-[5px] border-red-400 mt-[4px] text-orange-400">
+                </div>
+                <div class="mt-4">
+                    <label for="inputDate" class="text-[18px] sm:text-[20px]">Date: </label><br>
+                    <input type="date" name="" id="inputDate" placeholder="Enter Date"
+                        class="px-4 py-2 w-full max-w-[500px] rounded-lg shadow-lg border-[5px] border-red-400 mt-[4px] text-orange-400">
+                </div>
+            </form>
+
+            <div class="mt-4 text-center">
+                <button type="button"
+                    class="px-4 py-2 bg-red-500 text-white rounded-lg shadow-lg active:bg-red-600 duration-300"
+                    id="addProductBtn">
+                    Add Product
+                </button>
+            </div>
+
+            <div class="productdetails mt-4 overflow-x-auto">
+                <table class="min-w-full border-collapse rounded-lg overflow-hidden shadow-lg">
+                    <thead class="bg-[#333] bg-opacity-80 backdrop-blur-lg text-white">
+                        <tr>
+                            <th class="px-2 sm:px-4 md:px-6 py-3 text-center text-sm sm:text-base">Product</th>
+                            <th class="px-2 sm:px-4 md:px-6 py-3 text-center text-sm sm:text-base">Price</th>
+                            <th class="px-2 sm:px-4 md:px-6 py-3 text-center text-sm sm:text-base">Date</th>
+                            <th class="px-2 sm:px-4 md:px-6 py-3 text-center text-sm sm:text-base">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-[#333] bg-opacity-80 backdrop-blur-lg text-white" id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const addProductBtn = document.getElementById('addProductBtn')
+            let allProducts = JSON.parse(localStorage.getItem('allProducts')) || []
+
+            const saveProducts = () => {
+                localStorage.setItem('allProducts', JSON.stringify(allProducts))
+            }
+
+            const renderProducts = () => {
+                const tableBody = document.getElementById('tableBody')
+                let rows = ''
+                for (let i = 0; i < allProducts.length; i++) {
+                    const singleProduct = allProducts[i]
+                    const
+                        productTitle = !singleProduct.isBought ? 'text-red-400' : 'text-green-500'
+                    rows += `<tr data-index="${i}">
+            <td class="px-2 sm:px-4 md:px-6 py-3 text-center text-sm sm:text-base ${productTitle}">${singleProduct.Item}
+            </td>
+            <td class="px-2 sm:px-4 md:px-6 py-3 text-center text-sm sm:text-base ${productTitle}">${singleProduct.Price}
+            </td>
+            <td class="px-2 sm:px-4 md:px-6 py-3 text-center text-sm sm:text-base ${productTitle}">${singleProduct.Date}
+            </td>
+            <td class="px-2 sm:px-4 md:px-6 py-3 text-center text-sm sm:text-base">
+                <div class="buttons flex flex-row justify-center items-center gap-2">
+                    <button type="button"
+                        class="bg-green-400 shadow-lg active:bg-green-600 duration-300 complete rounded-lg p-2">
+                        <img src="https://cdn-icons-png.flaticon.com/128/17822/17822233.png" alt="right"
+                            class="h-5 filter invert grayscale">
+                    </button>
+                    <button type="button" class="bg-red-600 shadow-lg active:bg-red-700 duration-300 delete rounded-lg p-2">
+                        <img src="https://cdn-icons-png.flaticon.com/128/7491/7491835.png" alt="delete"
+                            class="h-5 filter invert grayscale">
+                    </button>
+                </div>
+            </td>
+            </tr>`
+                }
+
+                tableBody.innerHTML = rows
+
+                tableBody.querySelectorAll(".delete").forEach(btn => {
+                    btn.addEventListener("click", (e) => {
+                        const tr = e.target.closest('tr')
+                        if (!tr) return
+                        const index = parseInt(tr.dataset.index)
+                        if (isNaN(index)) return
+                        if (confirm("Are You Sure?")) {
+                            allProducts.splice(index, 1)
+                            saveProducts()
+                        } else {
+                            alert("User Cancelled Deletion")
+                        }
+                        renderProducts()
+                    })
+                })
+
+                tableBody.querySelectorAll(".complete").forEach(btn => {
+                    btn.addEventListener("click", (e) => {
+                        const tr = e.target.closest('tr')
+                        if (!tr) return
+                        const index = parseInt(tr.dataset.index)
+                        if (isNaN(index)) return
+                        allProducts[index].isBought = !allProducts[index].isBought
+                        saveProducts()
+                        renderProducts()
+                    })
+                })
+            }
+
+            const addProduct = () => {
+                const inputItem = document.getElementById('inputItem').value.trim()
+                const inputPrice = document.getElementById('inputPrice').value.trim()
+                const inputDate = document.getElementById('inputDate').value.trim()
+
+                if (inputItem === '' || inputPrice === '' || inputDate === '') {
+                    alert("Please Enter The Details First")
+                    return
+                }
+
+                const productDetails = {
+                    productId: Date.now(),
+                    Item: inputItem,
+                    Price: inputPrice,
+                    Date: `${new Date(inputDate).getDate()}/${new Date(inputDate).getMonth() + 1}/${new
+                        Date(inputDate).getFullYear()}`,
+                    isBought: false
+                }
+                allProducts.push(productDetails)
+                console.log(allProducts)
+                saveProducts()
+                renderProducts()
+            }
+
+            addProductBtn.addEventListener("click", addProduct)
+
+            renderProducts()
+        })
+    </script>
+
+</body>
+
+</html>
